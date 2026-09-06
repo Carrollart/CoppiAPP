@@ -1,3 +1,3 @@
-# CoppiAPP
+# CoppiAPP v3
 
-600 attività: 100 per Casa, Uscita, Gioco, Connessione, Progetto e Cibo.
+720 idee, 120 per categoria, con forte varietà semantica.
