@@ -1,0 +1,9 @@
+{
+  "name": "CoppiAPP",
+  "short_name": "CoppiAPP",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f1ef",
+  "theme_color": "#f4ece9",
+  "description": "Motore decisionale di coppia per attività condivise"
+}

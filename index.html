@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4ece9">
+<link rel="manifest" href="manifest.json">
+<title>CoppiAPP</title>
+<style>
+:root{--bg:#f6f1ef;--card:#fff;--txt:#292525;--muted:#716965;--accent:#5a4740;--line:#e4d8d3;}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--txt)}
+.wrap{max-width:620px;margin:auto;padding:18px 16px 38px}
+h1{font-size:34px;margin:4px 0 0} .sub{color:var(--muted);margin:2px 0 20px}
+.card{background:var(--card);border-radius:20px;padding:16px;margin:12px 0;box-shadow:0 6px 22px rgba(0,0,0,.06)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
+select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:white;font-size:15px}
+.result{text-align:center;padding:22px 12px}
+.area{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.activity{font-size:22px;line-height:1.25;margin:12px 0}
+.rule{font-size:14px;font-style:italic;color:var(--muted)}
+.meta{font-size:12px;color:var(--muted);margin-top:14px}
+button{border:0;border-radius:14px;padding:14px 16px;font-size:15px;font-weight:700}
+.primary{background:var(--accent);color:white;width:100%;font-size:18px}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.secondary{background:#eee4e0;color:var(--txt)}
+.small{font-size:12px;color:var(--muted);text-align:center;margin-top:16px}
+.hist{font-size:13px;line-height:1.4;border-top:1px solid var(--line);padding:9px 0}
+@media(max-width:420px){.grid{grid-template-columns:1fr} .row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>CoppiAPP</h1>
+  <div class="sub">Una sola proposta concreta per voi due.</div>
+
+  <div class="card grid">
+    <div><label>Bisogno</label><select id="mode">
+      <option>Connettersi</option><option>Rigenerare</option><option>Giocare</option><option>Esplorare</option><option>Progettare</option>
+    </select></div>
+    <div><label>Energia comune</label><select id="energy"><option value="1">1 · bassa</option><option value="2" selected>2 · media</option><option value="3">3 · alta</option></select></div>
+    <div><label>Tempo</label><select id="minutes"><option>10</option><option>20</option><option>30</option><option>45</option><option selected>60</option><option>90</option><option>120</option><option>180</option></select></div>
+    <div><label>Voglia di parlare</label><select id="talk"><option value="0">0 · niente</option><option value="1" selected>1 · poca</option><option value="2">2 · media</option><option value="3">3 · molta</option></select></div>
+    <div><label>Dove</label><select id="place"><option>Indifferente</option><option>Casa</option><option>Fuori</option></select></div>
+    <div><label>Budget</label><select id="budget"><option value="0">0 · gratis</option><option value="1" selected>1 · basso</option><option value="2">2 · libero</option></select></div>
+    <div style="grid-column:1/-1"><label>Situazione</label><select id="state">
+      <option>Siamo indecise</option><option>Siamo stanche</option><option>Ci annoiamo</option><option>Abbiamo bisogno di vicinanza</option><option>Vogliamo fare qualcosa</option><option>Vogliamo uscire</option><option>Vogliamo stare a casa</option>
+    </select></div>
+  </div>
+
+  <div class="card result">
+    <div class="area" id="area">—</div>
+    <div class="activity" id="activity">Premete DECIDI PER NOI</div>
+    <div class="rule" id="rule"></div>
+    <div class="meta" id="meta"></div>
+  </div>
+
+  <button class="primary" onclick="decide()">DECIDI PER NOI</button>
+  <div class="row">
+    <button class="secondary" onclick="feedback('ci_va')">CI VA</button>
+    <button class="secondary" onclick="easier()">TROPPO SBATTI</button>
+    <button class="secondary" onclick="feedback('non_ci_va',true)">NON CI VA</button>
+  </div>
+
+  <div class="card">
+    <b>Storico recente</b>
+    <div id="history" style="margin-top:8px"></div>
+  </div>
+  <div class="small">Funziona anche offline dopo la prima apertura. Lo storico resta sul telefono.</div>
+</div>
+<script>
+const ACTIVITIES = [{"area": "Casa", "text": "Scegliete un film e preparate una cena semplice insieme.", "energy": 1, "time": 120, "talk": 1, "place": "Casa", "budget": 1, "modes": ["Rigenerare", "Connettersi"]}, {"area": "Casa", "text": "Fate una degustazione casalinga: 3 snack o bevande e voti da 1 a 10.", "energy": 1, "time": 45, "talk": 2, "place": "Casa", "budget": 1, "modes": ["Giocare", "Connettersi"]}, {"area": "Casa", "text": "Leggete 20 minuti vicine, poi raccontatevi una cosa che vi ha colpito.", "energy": 1, "time": 40, "talk": 1, "place": "Casa", "budget": 0, "modes": ["Rigenerare", "Connettersi"]}, {"area": "Casa", "text": "Fate una serata senza telefoni per 60 minuti con musica e divano.", "energy": 1, "time": 60, "talk": 1, "place": "Casa", "budget": 0, "modes": ["Rigenerare", "Connettersi"]}, {"area": "Uscita", "text": "Passeggiata senza meta di 30 minuti, scegliendo a turno le svolte.", "energy": 1, "time": 40, "talk": 1, "place": "Fuori", "budget": 0, "modes": ["Rigenerare", "Giocare"]}, {"area": "Uscita", "text": "Andate a prendere un gelato o un dolce e tornate facendo una strada diversa.", "energy": 1, "time": 45, "talk": 1, "place": "Fuori", "budget": 1, "modes": ["Rigenerare", "Connettersi"]}, {"area": "Uscita", "text": "Fate una passeggiata fotografica: 5 foto a testa su un tema scelto.", "energy": 1, "time": 60, "talk": 1, "place": "Fuori", "budget": 0, "modes": ["Giocare", "Connettersi"]}, {"area": "Uscita", "text": "Andate in libreria e scegliete un libro l'una per l'altra.", "energy": 1, "time": 60, "talk": 1, "place": "Fuori", "budget": 1, "modes": ["Giocare", "Connettersi"]}, {"area": "Gioco", "text": "Giocate una partita a scacchi con una regola assurda scelta insieme.", "energy": 2, "time": 35, "talk": 1, "place": "Casa", "budget": 0, "modes": ["Giocare"]}, {"area": "Gioco", "text": "Fate un quiz a vicenda: 10 domande curiose, niente temi seri.", "energy": 1, "time": 30, "talk": 3, "place": "Casa", "budget": 0, "modes": ["Giocare", "Connettersi"]}, {"area": "Gioco", "text": "Create insieme una mini-storia alternando una frase a testa.", "energy": 1, "time": 20, "talk": 2, "place": "Casa", "budget": 0, "modes": ["Giocare", "Connettersi"]}, {"area": "Gioco", "text": "Costruite qualcosa di inutile con cartone, carta o oggetti di recupero.", "energy": 2, "time": 45, "talk": 1, "place": "Casa", "budget": 0, "modes": ["Giocare", "Esplorare"]}, {"area": "Connessione", "text": "Ditevi una cosa che avete apprezzato dell'altra questa settimana.", "energy": 1, "time": 10, "talk": 2, "place": "Casa", "budget": 0, "modes": ["Connettersi"]}, {"area": "Connessione", "text": "Rispondete entrambe: 'cosa mi farebbe stare bene stasera, realisticamente?'.", "energy": 1, "time": 10, "talk": 3, "place": "Casa", "budget": 0, "modes": ["Connettersi"]}, {"area": "Connessione", "text": "Fate 15 minuti di coccole o vicinanza senza parlare di problemi.", "energy": 1, "time": 15, "talk": 0, "place": "Casa", "budget": 0, "modes": ["Connettersi", "Rigenerare"]}, {"area": "Progetto", "text": "Scegliete una sola cosa da fare insieme nel weekend e fissate il primo passo.", "energy": 1, "time": 20, "talk": 2, "place": "Casa", "budget": 0, "modes": ["Progettare"]}, {"area": "Progetto", "text": "Create una lista condivisa di 10 micro-avventure da massimo mezza giornata.", "energy": 1, "time": 25, "talk": 2, "place": "Casa", "budget": 0, "modes": ["Progettare", "Connettersi"]}, {"area": "Cibo", "text": "Scegliete una cucina del mondo e preparate una versione semplice di un piatto.", "energy": 2, "time": 75, "talk": 1, "place": "Casa", "budget": 1, "modes": ["Giocare", "Esplorare"]}, {"area": "Cibo", "text": "Create due toast/piadine diverse e fate assaggio incrociato.", "energy": 1, "time": 30, "talk": 1, "place": "Casa", "budget": 1, "modes": ["Giocare", "Rigenerare"]}, {"area": "Cibo", "text": "Ordinate una cosa che nessuna delle due prende di solito.", "energy": 1, "time": 60, "talk": 1, "place": "Casa", "budget": 2, "modes": ["Esplorare", "Rigenerare"]}];
+const RULES = {"Siamo indecise": ["Niente confronto dopo la proposta: provatela per 10 minuti.", "Se è abbastanza buona, vale.", "Una sola decisione alla volta."], "Siamo stanche": ["Comfort prima della prestazione.", "Meglio vicinanza leggera che programma perfetto.", "Niente attività che richieda preparazione lunga."], "Ci annoiamo": ["Privilegiate novità o gioco.", "Niente scroll passivo prima di aver provato l'attività.", "Scegliete qualcosa con una piccola sorpresa."], "Abbiamo bisogno di vicinanza": ["Niente problem solving nei primi 15 minuti.", "Cercate presenza, non una soluzione.", "Una cosa piacevole condivisa prima dei temi pesanti."], "Vogliamo fare qualcosa": ["Partite entro 5 minuti.", "Niente progettazione eccessiva.", "Scegliete qualcosa che lasci un ricordo o un piccolo output."], "Vogliamo uscire": ["Meta semplice, partenza rapida.", "Non serve che l'uscita sia memorabile.", "Scegliete il luogo abbastanza interessante più vicino."], "Vogliamo stare a casa": ["Rendete la casa un po' diversa dal solito.", "Evitate di finire ognuna sul proprio schermo.", "Fate qualcosa di condiviso, anche minimo."]};
+let current = null;
+
+function v(id){return document.getElementById(id).value}
+function score(a){
+  let s=0, mode=v('mode'), energy=+v('energy'), minutes=+v('minutes'),
+      talk=+v('talk'), place=v('place'), budget=+v('budget'), state=v('state');
+  if(a.modes.includes(mode)) s+=5;
+  s += a.energy<=energy ? 3 : -5;
+  s += a.time<=minutes ? 3 : -6;
+  s += Math.abs(a.talk-talk)<=1 ? 2 : -2;
+  s += place==='Indifferente'||a.place===place ? 3 : -5;
+  s += a.budget<=budget ? 2 : -5;
+  if(state==='Siamo stanche' && a.energy===1) s+=4;
+  if(state==='Ci annoiamo' && (a.modes.includes('Giocare')||a.modes.includes('Esplorare'))) s+=4;
+  if(state==='Abbiamo bisogno di vicinanza' && a.modes.includes('Connettersi')) s+=4;
+  if(state==='Vogliamo uscire' && a.place==='Fuori') s+=4;
+  if(state==='Vogliamo stare a casa' && a.place==='Casa') s+=4;
+  return s+Math.random();
+}
+function decide(){
+  const ranked=[...ACTIVITIES].sort((a,b)=>score(b)-score(a));
+  current=ranked[Math.floor(Math.random()*Math.min(7,ranked.length))];
+  const rs=RULES[v('state')]; const rule=rs[Math.floor(Math.random()*rs.length)];
+  document.getElementById('area').textContent=current.area;
+  document.getElementById('activity').textContent=current.text;
+  document.getElementById('rule').textContent=rule;
+  document.getElementById('meta').textContent=`~${current.time} min · ${current.place} · budget ${current.budget}`;
+}
+function log(outcome){
+  if(!current)return;
+  const h=JSON.parse(localStorage.getItem('coppiapp_history')||'[]');
+  h.push({date:new Date().toLocaleString(), outcome, area:current.area, text:current.text});
+  localStorage.setItem('coppiapp_history',JSON.stringify(h.slice(-100)));
+  renderHistory();
+}
+function feedback(outcome,again=false){ log(outcome); if(again)decide(); else current=null; }
+function easier(){
+  log('troppo_sbatto');
+  document.getElementById('energy').value='1';
+  document.getElementById('minutes').value='30';
+  document.getElementById('budget').value='1';
+  decide();
+}
+function renderHistory(){
+  const h=JSON.parse(localStorage.getItem('coppiapp_history')||'[]').slice(-8).reverse();
+  document.getElementById('history').innerHTML = h.length ? h.map(x=>`<div class="hist"><b>${x.outcome.replaceAll('_',' ').toUpperCase()}</b> · ${x.area}<br>${x.text}</div>`).join('') : '<span style="color:#716965">Nessuna attività registrata.</span>';
+}
+renderHistory();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
